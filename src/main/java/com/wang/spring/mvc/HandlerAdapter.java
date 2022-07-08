@@ -29,7 +29,7 @@ public class HandlerAdapter {
      * @param handler
      */
     public Object handle(HttpServletRequest request, HttpServletResponse response, Handler handler,Map<String, String> pathVariableMap) throws InvocationTargetException, IllegalAccessException {
-        if(handler.method.getParameterCount()==0) {
+        if(handler.method.getParameterCount() == 0) {
         	return handler.method.invoke(handler.controller);
         }
         Class<?>[] parameterTypes = handler.method.getParameterTypes();
@@ -48,31 +48,31 @@ public class HandlerAdapter {
             paramValues[responseIndex] = response;
         }
         //注入消息体的内容
-        String bodyContent=null;
+        String bodyContent = null;
         try {
 			bodyContent = getBodyContent(request);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        if(request.getMethod().equals("POST") && bodyContent!=null) {
-        	Integer index=-1;
+        if(request.getMethod().equals("POST") && bodyContent != null) {
+        	Integer index = -1;
         	for(Integer i=0;i<parameters.length;i++) {
         		if(parameters[i].isAnnotationPresent(RequestBody.class)) {
-        			index=i;
+        			index = i;
         			break;
         		}
         	}
-        	if(index>=0) {
+        	if(index >= 0) {
         		Object body = JSON.parseObject(bodyContent, parameterTypes[index]);
-        		paramValues[index]=body;
+        		paramValues[index] = body;
         	}
         }
         //解析RequestParam和pathVariable中的参数
         Map<String, String[]> params = request.getParameterMap();
         for (Map.Entry<String, Integer> entry : paramMapping.entrySet()) {
         	Integer index = entry.getValue();
-        	if(paramValues[index]!=null) {
+        	if(paramValues[index] != null) {
         		continue;
         	}
         	if (!params.containsKey(entry.getKey())) {
@@ -126,9 +126,9 @@ public class HandlerAdapter {
     	{
     	    StringBuffer sb = new StringBuffer();
     	    BufferedReader bufferedReader = null;
-    	    String content = "";
+//    	    String content = "";
     	    try {
-    	        bufferedReader =  request.getReader() ;
+    	        bufferedReader =  request.getReader();
     	        char[] charBuffer = new char[128];
     	        int bytesRead;
     	        while ( (bytesRead = bufferedReader.read(charBuffer)) != -1 ) {

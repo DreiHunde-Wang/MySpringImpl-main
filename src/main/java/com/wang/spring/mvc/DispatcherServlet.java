@@ -140,7 +140,7 @@ public class DispatcherServlet extends HttpServlet {
             paramMapping = new HashMap<String, Integer>();
             //把这个方法上面所有的参数全部获取到
             Request req = entry.getKey();
-            Handler handler =entry.getValue();
+            Handler handler = entry.getValue();
             Class<?>[] parameterTypes = handler.method.getParameterTypes();
             //有顺序，但是通过反射，没法拿到我们参数名字
             //因为每个参数上面是可以加多个数组的，所以是二维数组,第一位表示参数位置，第二位表示注解个数
@@ -212,8 +212,8 @@ public class DispatcherServlet extends HttpServlet {
             return null;
         }
         Request req = createRequest(request);
-        System.out.println("getHander,url is "+req.requestPath);
-        for(Request request2:handlerMapping.keySet()) {
+        System.out.println("getHandler,url is "+req.requestPath);
+        for(Request request2 : handlerMapping.keySet()) {
         	if(request2.equals(req)) {
         		return handlerMapping.get(request2);
         	}
@@ -234,7 +234,7 @@ public class DispatcherServlet extends HttpServlet {
     
     private Map<String, String> getPathVariableMap(HttpServletRequest request){
         Request req = createRequest(request);
-        for(Request reqKey:handlerMapping.keySet()) {
+        for(Request reqKey : handlerMapping.keySet()) {
         	if(reqKey.equals(req)) {
         		return Request.parsePathVariable(reqKey.requestPath, req.requestPath);
         	}
@@ -250,19 +250,20 @@ public class DispatcherServlet extends HttpServlet {
      */
     private void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception{
 		Handler handler = getHandler(request);
-		if(handler==null) {
+		if(handler == null) {
 			response.getWriter().write("404 Handler Not Found");
 		}
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
 		//执行HandlerAdapter，解析执行结果
 		if(null!=handlerAdapter) {
 			Map<String, String> pathVariableMap = getPathVariableMap(request);
-			Object data = handlerAdapter.handle(request, response, handler,pathVariableMap);
+            //根据实际返回的数据类型进行解析
+			Object data = handlerAdapter.handle(request, response, handler, pathVariableMap);
 			if(data instanceof ModelAndView) {
 				ResultResolverHandler.handlerFreemarkerResult(data,cfg,request,response);
 			}
 			else if(isResponseBody(handler)){
-				ResultResolverHandler.handleJsonResult(data,response);
+				ResultResolverHandler.handleJsonResult(data, response);
 			}
 			else {
 				ResultResolverHandler.handleStringResult(data, response);
@@ -278,7 +279,8 @@ public class DispatcherServlet extends HttpServlet {
      * @return
      */
     private boolean isResponseBody(Handler handler) {
-    	return handler.method.isAnnotationPresent(ResponseBody.class) || handler.controller.getClass().isAnnotationPresent(ResponseBody.class);
+    	return handler.method.isAnnotationPresent(ResponseBody.class) ||
+                handler.controller.getClass().isAnnotationPresent(ResponseBody.class);
     }
     
     /**

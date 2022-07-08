@@ -1,15 +1,14 @@
 package com.wang.spring.annotation.aop;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.wang.spring.constants.IsolationLevelConstant;
+import com.wang.spring.constants.PropagationLevelConstant;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.sql.Connection;
 
-import com.wang.spring.constants.IsolationLevelConstant;
-import com.wang.spring.constants.PropagationLevelConstant;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })

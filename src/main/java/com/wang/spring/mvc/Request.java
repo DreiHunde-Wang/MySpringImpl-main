@@ -36,20 +36,21 @@ public class Request {
     public String toString() {
     	return requestMethod+":"+requestPath;
     }
-    public static boolean pathMatch(String path1,String path2) {
+    public static boolean pathMatch(String path1, String path2) {
     	String[] pathSplit1 = path1.split("/");
     	String[] pathSplit2 = path2.split("/");
-    	if(pathSplit1.length!=pathSplit2.length) {
+    	if(pathSplit1.length != pathSplit2.length) {
     		return false;
     	}
-    	for(int i=0;i<pathSplit1.length;i++) {
+    	for(int i = 0; i < pathSplit1.length; i++) {
     		if(!pathSplit1[i].equals(pathSplit2[i])) {
-    			boolean b1 = (pathSplit1[i].startsWith("{")&&pathSplit1[i].endsWith("}"));
-    			boolean b2 = (pathSplit2[i].startsWith("{")&&pathSplit2[i].endsWith("}"));
-    			if( (b1==true && b2==false) ||  (b2==true && b1==false)) {
+    			boolean b1 = (pathSplit1[i].startsWith("{") && pathSplit1[i].endsWith("}"));
+    			boolean b2 = (pathSplit2[i].startsWith("{") && pathSplit2[i].endsWith("}"));
+//    			if( (b1 == true && b2 == false) ||  (b2 == true && b1 == false)) {
+				//一个有参数一个没参数，则忽略该参数
+				if( (b1 && !b2) ||  (b2 && !b1)) {
     				continue;
-    			}
-    			else {
+    			} else {
 					return false;
 				}
     		}
@@ -57,16 +58,16 @@ public class Request {
 		return true;
     }
     
-    public static Map<String, String> parsePathVariable(String path1,String path2) {
-    	Map<String, String> pathVariableMap=new HashedMap<>();
+    public static Map<String, String> parsePathVariable(String path1, String path2) {
+    	Map<String, String> pathVariableMap = new HashedMap<>();
     	String[] pathSplit1 = path1.split("/");
     	String[] pathSplit2 = path2.split("/");
-    	if(pathSplit1.length!=pathSplit2.length) {
+    	if(pathSplit1.length != pathSplit2.length) {
     		throw new RuntimeException("path1:"+path1+" 与 path2:"+path2+"  长度不匹配");
     	}
-    	for(int i=0;i<pathSplit1.length;i++) {
+    	for(int i = 0; i < pathSplit1.length; i++) {
     		if(!pathSplit1[i].equals(pathSplit2[i])) {
-    			if((pathSplit1[i].startsWith("{")&&pathSplit1[i].endsWith("}"))) {
+    			if((pathSplit1[i].startsWith("{") && pathSplit1[i].endsWith("}"))) {
     				String pathVariableName = pathSplit1[i].replace("{", "").replace("}", "").trim();
     				String pathVariableValue = pathSplit2[i].trim();
     				pathVariableMap.put(pathVariableName, pathVariableValue);

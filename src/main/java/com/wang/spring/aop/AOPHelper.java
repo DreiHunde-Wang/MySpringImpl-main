@@ -26,9 +26,9 @@ import com.wang.spring.ioc.DefaultBeanFactory;
 import com.wang.spring.ioc.GenericBeanDefinition;
 
 public class AOPHelper {
-	private static volatile AOPHelper aopHelper=null;
+	private static volatile AOPHelper aopHelper = null;
 	//需要代理的目标类和目标方法的映射
-	private static Map<Class<?>, List<Method>> classMethodMap= new ConcurrentHashMap<>();
+	private static Map<Class<?>, List<Method>> classMethodMap = new ConcurrentHashMap<>();
 	//需要代理的目标方法和增强类的映射，value的map的key为通知的类型
 	private static Map<Method, Map<String, List<Advice>>> methodAdvicesMap = new ConcurrentHashMap<>();
 	/**
@@ -71,7 +71,7 @@ public class AOPHelper {
 				if(method.isAnnotationPresent(Pointcut.class)) {
 					String pointcutName = method.getName();
 					String pointcut = method.getAnnotation(Pointcut.class).value();
-					if(pointcut!=null && !pointcut.equals("")) {
+					if(pointcut != null && !pointcut.equals("")) {
 						pointcuts.put(pointcutName, pointcut);
 					}
 				}

@@ -14,7 +14,7 @@ public class Advice {
 	//级别，一个方法有多个增强时根据级别排序
 	private Integer order;
 	private String throwName;
-	public Advice(Object aspect, Method adviceMethod,Integer order) {
+	public Advice(Object aspect, Method adviceMethod, Integer order) {
 		this.aspect = aspect;
 	    this.adviceMethod = adviceMethod;
 	    this.order = order;

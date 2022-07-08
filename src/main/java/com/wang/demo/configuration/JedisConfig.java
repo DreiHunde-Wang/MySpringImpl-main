@@ -30,10 +30,11 @@ public class JedisConfig {
 	    config.setNumTestsPerEvictionRun(10);
 	    //逐出连接的最小空闲时间，默认是180000（30分钟）
 	    config.setMinEvictableIdleTimeMillis(60000);
-	    String redisHost = "" ;//Jedis服务器地址
+	    String redisHost = "127.0.0.1" ;//Jedis服务器地址
 	    Integer port = 6379;
 	    String password = "";
-	    Jedis resource = new JedisPool(config, redisHost, 6379, 30000, password, 0).getResource();
+//	    Jedis resource = new JedisPool(config, redisHost, 6379, 30000, password, 0).getResource();
+		Jedis resource = new JedisPool(config, redisHost, 6379, 30000).getResource();
 	    return resource;
 	}
 	

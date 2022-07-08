@@ -101,11 +101,11 @@ public final class ClassUtil {
               doAddClass(classSet, className);
           } else {
               String subPackagePath = fileName;
-              if (packagePath != null && packagePath != "") {
+              if (packagePath != null && !packagePath.equals("")) {
                   subPackagePath = packagePath + "/" + subPackagePath;
               }
               String subPackageName = fileName;
-              if (packageName != null && packageName != "") {
+              if (packageName != null && !packageName.equals("")) {
                   subPackageName = packageName + "." + subPackageName;
               }
               addClass(classSet, subPackagePath, subPackageName);
