@@ -30,7 +30,7 @@ import freemarker.template.TemplateExceptionHandler;
 
 public class DispatcherServlet extends HttpServlet {
 	//bean工厂
-	private static DefaultBeanFactory beanFactory=DefaultBeanFactory.getInstance();
+	private static DefaultBeanFactory beanFactory = DefaultBeanFactory.getInstance();
 	//请求到Handler的映射
 	private Map<Request, Handler> handlerMapping = new HashMap<>();
 	//Handler到Handler的映射
@@ -88,7 +88,7 @@ public class DispatcherServlet extends HttpServlet {
 	 */
 	private void registerServlet(ServletContext servletContext) {
         ServletRegistration defaultServlet = servletContext.getServletRegistration("default");
-        if(defaultServlet==null) {
+        if(defaultServlet == null) {
         	throw new RuntimeException("无法动态注册处理静态资源的默认Servlet");
         }
         defaultServlet.addMapping(this.getClass().getResource("/").getPath()+ConfigUtil.getAppAssetPath() + "*");
@@ -102,8 +102,9 @@ public class DispatcherServlet extends HttpServlet {
     	if(beanFactory.isEmpty()) {
     		throw new Exception("ioc容器未初始化");
     	}
+        //获得所有被@Controller注释过的class
     	Set<Class<?>> classSet = ClassSetHelper.getControllerClassSet();
-    	for(Class<?> clazz:classSet) {
+    	for(Class<?> clazz : classSet) {
             String url = "";
             RequestMethod requestMethod = RequestMethod.GET;
             if(clazz.isAnnotationPresent(RequestMapping.class)) {

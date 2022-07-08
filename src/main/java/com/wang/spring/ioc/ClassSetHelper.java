@@ -128,6 +128,7 @@ public class ClassSetHelper {
     public static Set<Class<?>> getClassSetByInheritedAnnotation(Class<? extends Annotation> present){
         Set<Class<?>> classSet = new HashSet<Class<?>>();
         for (Class<?> cls : CLASS_SET) {
+            //如果cls和present有直接或间接的关系，就加入到set中
             if(isAnnoPresent(cls,present)){
                 classSet.add(cls);
             }

@@ -19,6 +19,7 @@ import com.wang.mybatis.transaction.TransactionStatus;
  * @author Administrator
  *
  */
+
 public class SimpleExecutor implements Executor{
 
     public TransactionManager transactionManager;

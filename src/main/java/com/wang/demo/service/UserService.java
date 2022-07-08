@@ -7,9 +7,6 @@ import com.wang.demo.model.UserRequest;
 import com.wang.spring.annotation.aop.Transactional;
 import com.wang.spring.annotation.ioc.Autowired;
 import com.wang.spring.annotation.ioc.Service;
-import com.wang.spring.annotation.ioc.Value;
-import com.wang.spring.constants.PropagationLevelConstant;
-
 import redis.clients.jedis.Jedis;
 @Service
 public class UserService implements IUserService{

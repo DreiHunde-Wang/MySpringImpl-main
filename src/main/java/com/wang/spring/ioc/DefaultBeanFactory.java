@@ -25,11 +25,11 @@ public class DefaultBeanFactory implements BeanFactory{
 	//一级缓存Bean容器，IOC容器，直接从此处获取Bean
 	private static Map<String, Object> singletonObjects = new ConcurrentHashMap<>();
 	//二级缓存，为了将完全地Bean和半成品的Bean分离，避免读取到不完整的Bean
-	private static Map<String,Object> earlySingletonObjects=new ConcurrentHashMap<>();
+	private static Map<String,Object> earlySingletonObjects = new ConcurrentHashMap<>();
 	//三级缓存，值为一个对象工厂，可以返回实例对象
-	private static Map<String,ObjectFactory> singletonFactories=new ConcurrentHashMap<>();
+	private static Map<String,ObjectFactory> singletonFactories = new ConcurrentHashMap<>();
 	//是否在创建中
-	private  static  Set<String> singletonsCurrennlyInCreation=new HashSet<>();
+	private  static  Set<String> singletonsCurrentlyInCreation = new HashSet<>();
 	//Bean的注册信息BeanDefinition容器
 	private static Map<String, BeanDefinition> beanDefinitionMap = BeanDefinitionRegistry.getBeanDefinitionMap();
 	/**
@@ -61,10 +61,10 @@ public class DefaultBeanFactory implements BeanFactory{
 	 * @return
 	 */
 	public static DefaultBeanFactory getInstance() {
-		if(null==instance) {
+		if(null == instance) {
 			 synchronized (DefaultBeanFactory.class){
-				if(null==instance) {
-					instance=new DefaultBeanFactory();
+				if(null == instance) {
+					instance = new DefaultBeanFactory();
 					return instance;
 				}
 			}
@@ -167,8 +167,9 @@ public class DefaultBeanFactory implements BeanFactory{
 	 * @throws Exception
 	 */
 	private void initConfigBean() throws Exception {
+		//获取所有的@Configure配置类
 		Set<Class<?>> configClassSet = ClassSetHelper.getClassSetByAnnotation(Configuration.class);
-		if(configClassSet==null || configClassSet.isEmpty()) {
+		if(configClassSet == null || configClassSet.isEmpty()) {
 			return;
 		}
 		for(Class<?> configClass : configClassSet) {
@@ -178,8 +179,10 @@ public class DefaultBeanFactory implements BeanFactory{
 			BeanDefinitionRegistry.registryBeanDefinition(configClass.getName(), genericBeanDefinition);
 			Object configBean = getBean(configClass);
 			Method[] methods = configClass.getDeclaredMethods();
-			for(Method method:methods) {
+			//根据配置类的方法配置Bean
+			for(Method method : methods) {
 				if(method.isAnnotationPresent(Bean.class)) {
+					//根据方法的返回类类型确定要注入的Bean对象
 					Class<?> returnClass = method.getReturnType();
 					Object bean = method.invoke(configBean);
 					String keyName = returnClass.getName();
@@ -206,20 +209,20 @@ public class DefaultBeanFactory implements BeanFactory{
 			return bean;
 		}
 		//如果未获取到bean，且bean不在创建中，则置bean的状态为在创建中
-		if(!singletonsCurrennlyInCreation.contains(beanName)) {
-			singletonsCurrennlyInCreation.add(beanName);
+		if(!singletonsCurrentlyInCreation.contains(beanName)) {
+			singletonsCurrentlyInCreation.add(beanName);
 		}
 		BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-		if(beanDefinition==null) {
+		if(beanDefinition == null) {
 			throw new Exception("不存在 "+beanName+" 的定义");
 		}
 		Class<?> beanClass = beanDefinition.getBeanClass();
 		//找到实现类
 		beanClass = findImplementClass(beanClass,null);
 		//判断是否需要代理，若需要则生成代理类
-		if(beanDefinition.getIsProxy() && beanDefinition.getProxy()!=null) {
+		if(beanDefinition.getIsProxy() && beanDefinition.getProxy() != null) {
 			MyProxy myProxy = beanDefinition.getProxy();
-			bean=myProxy.getProxy(beanClass);
+			bean = myProxy.getProxy(beanClass);
 		}
 		else {
 			bean = beanClass.getDeclaredConstructor().newInstance();
@@ -235,7 +238,7 @@ public class DefaultBeanFactory implements BeanFactory{
 		});
 		//反射调用init方法
 		String initMethodName = beanDefinition.getInitMethodName();
-		if(initMethodName!=null) {
+		if(initMethodName != null) {
 			Method method = beanClass.getMethod(initMethodName, null);
 			method.invoke(bean, null);
 		}
@@ -268,7 +271,7 @@ public class DefaultBeanFactory implements BeanFactory{
 			return bean;
 		}
 		//如果一级缓存不存在bean，且bean在创建中，则从二级缓存中拿出半成品bean返回，否则从三级缓存拿出放入二级缓存中
-		if(singletonsCurrennlyInCreation.contains(beanName)) {
+		if(singletonsCurrentlyInCreation.contains(beanName)) {
 			bean = earlySingletonObjects.get(beanName);
 			if(bean == null) {
 				ObjectFactory factory = singletonFactories.get(beanName);
@@ -281,10 +284,39 @@ public class DefaultBeanFactory implements BeanFactory{
 		}
 		return bean;
 	}
+
+//	private Object getSingleton(String beanName, boolean allowEarlyReference) {
+//		// 首先从一级缓存中获取对象
+//		Object singletonObject = this.singletonObjects.get(beanName);
+//		// 没有从一级缓存中获取到对象，并且当前对象正处于创建中
+//		if (singletonObject == null && singletonsCurrentlyInCreation.contains(beanName)) {
+//			// 上锁，防止出现线程安全问题
+//			synchronized (this.singletonObjects) {
+//				// 从二级缓存中获取对象
+//				singletonObject = this.earlySingletonObjects.get(beanName);
+//				// 从二级缓存中没有获取到对象，并且这个对象允许提前暴露
+//				if (singletonObject == null && allowEarlyReference) {
+//					// 从三级缓存中获取 ObjectFactory 对象
+//					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+//					if (singletonFactory != null) {
+//						// 通过调用 ObjectFactory 的 getObject() 获取（并不完整的）对象
+//						singletonObject = singletonFactory.getObject();
+//						// 把获取到的对象保存的二级缓存中
+//						this.earlySingletonObjects.put(beanName, singletonObject);
+//						// 从三级缓存中移除对象
+//						this.singletonFactories.remove(beanName);
+//					}
+//				}
+//			}
+//		}
+//		return singletonObject;
+//	}
+
+
 	/**
 	 * 依赖注入
 	 * @param beanClass
-	 * @param instance
+	 * @param bean
 	 * @param isProxyed
 	 * @throws Exception
 	 */
@@ -365,7 +397,6 @@ public class DefaultBeanFactory implements BeanFactory{
                 }
             }
         }
-
     }
 	
 	/**
@@ -385,14 +416,14 @@ public class DefaultBeanFactory implements BeanFactory{
 				}
 				classSet.add(cls);
 			}
-			else if(interfaceClass==null) {
+			else if(interfaceClass == null) {
 				if(name!=null && !name.equals("")) {
 					if(isClassAnnotationedName(cls, name) || (cls.getSimpleName().equals(name) && !cls.isInterface())) {
 						return cls;
 					}
 				}
 			}
-		if(classSet!=null && !classSet.isEmpty()) {
+		if(classSet != null && !classSet.isEmpty()) {
 			implementClass = classSet.iterator().next();
 			}
 		}
