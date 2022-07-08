@@ -34,7 +34,7 @@ public class DispatcherServlet extends HttpServlet {
 	//请求到Handler的映射
 	private Map<Request, Handler> handlerMapping = new HashMap<>();
 	//Handler到Handler的映射
-	private Map<Handler, HandlerAdapter> adapaterMapping = new HashMap<>();
+	private Map<Handler, HandlerAdapter> adapterMapping = new HashMap<>();
 	//FreeMarker配置对象
 	private Configuration cfg = null;
 	
@@ -96,7 +96,6 @@ public class DispatcherServlet extends HttpServlet {
 	
     /**
      * 解析url和Method的关联关系
-     * @param context
      */
     private void initHandlerMappings() throws Exception{
     	if(beanFactory.isEmpty()) {
@@ -130,7 +129,6 @@ public class DispatcherServlet extends HttpServlet {
     }
     /**
      * 适配器（匹配的过程）,主要是用来动态匹配我们参数的
-     * @param context
      */
     private void initHandlerAdapters() throws Exception{
         if (handlerMapping.isEmpty()) {
@@ -173,7 +171,7 @@ public class DispatcherServlet extends HttpServlet {
                     }
                 }
             }
-            adapaterMapping.put(handler, new HandlerAdapter(paramMapping));
+            adapterMapping.put(handler, new HandlerAdapter(paramMapping));
         }
     }
     /**
@@ -228,10 +226,10 @@ public class DispatcherServlet extends HttpServlet {
      * @return
      */
     private HandlerAdapter getHandlerAdapter(Handler handler) {
-    	if(handler==null || adapaterMapping==null || adapaterMapping.isEmpty()) {
+    	if(handler==null || adapterMapping==null || adapterMapping.isEmpty()) {
     		return null;
     	}
-		return adapaterMapping.get(handler);
+		return adapterMapping.get(handler);
 	}
     
     private Map<String, String> getPathVariableMap(HttpServletRequest request){
@@ -285,17 +283,14 @@ public class DispatcherServlet extends HttpServlet {
     
     /**
      * 请求解析
-     * @param context
      */
     private void initMultipartResolver(){}
     /**
      * 多语言、国际化
-     * @param context
      */
     private void initLocaleResolver(){}
     /**
      * 主题View层的
-     * @param context
      */
     private void initThemeResolver(){}
 }
