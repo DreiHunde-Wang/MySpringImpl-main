@@ -16,10 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.wang.mybatis.core.MapperHelper;
-import com.wang.spring.annotation.mvc.PathVariable;
-import com.wang.spring.annotation.mvc.RequestMapping;
-import com.wang.spring.annotation.mvc.RequestParam;
-import com.wang.spring.annotation.mvc.ResponseBody;
+import com.wang.spring.annotation.mvc.*;
 import com.wang.spring.aop.AOPHelper;
 import com.wang.spring.constants.RequestMethod;
 import com.wang.spring.ioc.ClassSetHelper;
@@ -114,12 +111,28 @@ public class DispatcherServlet extends HttpServlet {
           //扫描Controller下面的所有方法
             Method[] methods = clazz.getMethods();
             for (Method method : methods) {
-                if (!method.isAnnotationPresent(RequestMapping.class)) {
+                String value = null;
+                requestMethod = null;
+                if (method.isAnnotationPresent(RequestMapping.class)) {
+                    value = method.getAnnotation(RequestMapping.class).value();
+                    requestMethod = method.getAnnotation(RequestMapping.class).method();
+                } else if (method.isAnnotationPresent(GetMapping.class)) {
+                    value = method.getAnnotation(GetMapping.class).value();
+                    requestMethod = method.getAnnotation(GetMapping.class).method();
+                } else if (method.isAnnotationPresent((PostMapping.class))) {
+                    value = method.getAnnotation(PostMapping.class).value();
+                    requestMethod = method.getAnnotation(PostMapping.class).method();
+                } else {
                     continue;
                 }
-                RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-                String url2 = (url + requestMapping.value()).replaceAll("/+", "/");
-                requestMethod = requestMapping.method();
+//                if (!method.isAnnotationPresent(RequestMapping.class) && !method.isAnnotationPresent(GetMapping.class)
+//                && !method.isAnnotationPresent(PostMapping.class)) {
+//                    continue;
+//                }
+//                RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+//                String url2 = (url + requestMapping.value()).replaceAll("/+", "/");
+                String url2 = (url + value).replaceAll("/+", "/");
+//                requestMethod = requestMapping.method();
                 Request req = new Request(requestMethod, url2);
                 Handler handler = new Handler(beanFactory.getBean(clazz), method);
                 handlerMapping.put(req, handler);

@@ -15,4 +15,7 @@ import java.lang.annotation.Target;
 public @interface PostMapping {
     @AliasFor(annotation = RequestMapping.class)
     String value() default "null";
+
+    @AliasFor(annotation = RequestMapping.class)
+    RequestMethod method() default RequestMethod.POST;
 }

@@ -15,4 +15,7 @@ public @interface GetMapping {
     @AliasFor(annotation = RequestMapping.class)
     String value() default "null";
 
+    @AliasFor(annotation = RequestMapping.class)
+    RequestMethod method() default RequestMethod.GET;
+
 }

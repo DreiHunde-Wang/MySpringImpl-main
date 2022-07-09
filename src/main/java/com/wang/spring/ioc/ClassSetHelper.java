@@ -18,6 +18,7 @@ import javax.annotation.Resources;
 import com.wang.spring.annotation.ioc.Component;
 import com.wang.spring.annotation.ioc.Service;
 import com.wang.spring.annotation.mvc.Controller;
+import com.wang.spring.annotation.mvc.RestController;
 import com.wang.spring.constants.ConfigConstant;
 import com.wang.spring.utils.ClassUtil;
 import com.wang.spring.utils.PropsUtil;
@@ -73,7 +74,7 @@ public class ClassSetHelper {
     public static Set<Class<?>> getControllerClassSet(){
         Set<Class<?>> classSet = new HashSet<Class<?>>();
         for (Class<?> cls : CLASS_SET) {
-            if (cls.isAnnotationPresent(Controller.class)) {
+            if (cls.isAnnotationPresent(Controller.class) || cls.isAnnotationPresent(RestController.class)) {
                 classSet.add(cls);
             }
         }
@@ -156,7 +157,7 @@ public class ClassSetHelper {
                     annotation.annotationType() != Retention.class &&
                     annotation.annotationType() != Documented.class &&
                     annotation.annotationType() != Inherited.class) {
-                if (annotation.annotationType() ==annoClass){
+                if (annotation.annotationType() == annoClass){
                     return true;
                 }else{
                 	return isAnnoPresent(annotation.annotationType(),annoClass);

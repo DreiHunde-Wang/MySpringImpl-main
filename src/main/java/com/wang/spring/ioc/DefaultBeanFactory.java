@@ -37,7 +37,7 @@ public class DefaultBeanFactory implements BeanFactory{
 	 */
 	static {
 		Set<Class<?>> beanClassSet = ClassSetHelper.getBeanClassSet();//ClassSetHelper.getInheritedComponentClassSet(); //
-		if(beanClassSet!=null && !beanClassSet.isEmpty()) {
+		if(beanClassSet != null && !beanClassSet.isEmpty()) {
 			try {
 				for(Class<?> beanClass : beanClassSet) {
 					GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
