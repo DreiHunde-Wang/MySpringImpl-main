@@ -9,7 +9,7 @@ import com.wang.spring.aop.JoinPoint;
 
 @Aspect
 public class Interceptor {
-	@Pointcut("com.wang.demo.service.UserService.register")
+	@Pointcut("com.wang.demo.service.Impl.UserService.registerUser")
 	public void point() {
 		
 	}
@@ -19,12 +19,12 @@ public class Interceptor {
 		System.out.println("开始调用registerUser,当前时间为："+System.currentTimeMillis());
 	}
 	
-	@Before(value = "com.wang.demo.service.UserService.loginUser")
+	@Before(value = "com.wang.demo.service.Impl.UserService.loginUser")
 	public void beforeService2() {
 		System.out.println("开始调用loginUser,当前时间为："+System.currentTimeMillis());
 	}
 	
-	@Before(value = "com.wang.demo.service.UserService.isUserLogin")
+	@Before(value = "com.wang.demo.service.Impl.UserService.isUserLogin")
 	public void beforeService3() {
 		System.out.println("开始调用isUserLogin,当前时间为："+System.currentTimeMillis());
 	}

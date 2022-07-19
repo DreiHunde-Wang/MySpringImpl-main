@@ -24,4 +24,7 @@ public class ConfigConstant {
     public static final String APP_JSP_PATH = "myspring.app.jsp_path";
     //静态资源路径
     public static final String APP_ASSET_PATH = "myspring.app.asset_path";
+
+    //Port配置
+    public static final String SERVER_PORT = "myspring.server.port";
 }

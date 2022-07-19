@@ -22,13 +22,13 @@ import net.sf.cglib.proxy.MethodProxy;
  */
 public class CGLibProxy implements MethodInterceptor,MyProxy{
 	//目标代理方法和增强列表的映射
-	Map<Method, Map<String, List<Advice>>> methodAdvicesMap=null;
+	Map<Method, Map<String, List<Advice>>> methodAdvicesMap = null;
 	//事务管理器
 	TransactionManager transactionManager = TransactionFactory.newTransaction();
 	
 	public CGLibProxy(Map<Method, Map<String, List<Advice>>> methodAdvicesMap) {
 		// TODO Auto-generated constructor stub
-		this.methodAdvicesMap=methodAdvicesMap;
+		this.methodAdvicesMap = methodAdvicesMap;
 	}
 	/**
 	 * 通过CGLib库生成代理类

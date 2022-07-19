@@ -3,15 +3,10 @@ package com.wang.demo.controller;
 import com.wang.demo.model.ResponseEntity;
 import com.wang.demo.model.User;
 import com.wang.demo.model.UserRequest;
-import com.wang.demo.service.IUserService;
+import com.wang.demo.service.Impl.UserServiceImpl;
 import com.wang.demo.service.UserService;
 import com.wang.spring.annotation.ioc.Autowired;
-import com.wang.spring.annotation.mvc.Controller;
-import com.wang.spring.annotation.mvc.PathVariable;
-import com.wang.spring.annotation.mvc.RequestBody;
-import com.wang.spring.annotation.mvc.RequestMapping;
-import com.wang.spring.annotation.mvc.RequestParam;
-import com.wang.spring.annotation.mvc.ResponseBody;
+import com.wang.spring.annotation.mvc.*;
 import com.wang.spring.constants.RequestMethod;
 import com.wang.spring.mvc.ModelAndView;
 
@@ -21,6 +16,9 @@ public class TestController {
 	
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	UserServiceImpl userServiceImpl;
 	
 	@ResponseBody
 	@RequestMapping(value = "/register",method = RequestMethod.POST)
@@ -86,7 +84,7 @@ public class TestController {
 	public ResponseEntity loginout(@PathVariable("id") Integer id){
 		try {
 			User user= userService.findUser(id);
-			System.out.println("测试循环依赖，如果相等则解决: "+userService+" "+userService.userservice2.userService);
+			System.out.println("测试循环依赖，如果相等则解决: "+userService+" "+ userServiceImpl.userservice2.userService);
 			if(user!=null) {
 				return ResponseEntity.success(user, "成功找到id="+id+"的用户");
 			}

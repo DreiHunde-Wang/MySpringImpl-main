@@ -82,6 +82,14 @@ public class ConfigUtil {
     }
 
     /**
+     * 根据配置获取ServerPort值
+     * @return
+     */
+    public static Integer getServerPort() {
+        return PropsUtil.getInt(CONFIG_PROPS, ConfigConstant.SERVER_PORT);
+    }
+
+    /**
      * 根据属性名获取 String 类型的属性值
      */
     public static String getString(String key) {

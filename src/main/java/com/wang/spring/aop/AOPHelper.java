@@ -48,9 +48,9 @@ public class AOPHelper {
 	 * @return
 	 */
 	public static AOPHelper getInstance() {
-		if(aopHelper==null) {
+		if(aopHelper == null) {
 			synchronized (AOPHelper.class) {
-				if(aopHelper==null) {
+				if(aopHelper == null) {
 					aopHelper = new AOPHelper();
 					return aopHelper;
 				}
@@ -63,11 +63,14 @@ public class AOPHelper {
 	 * @throws Exception
 	 */
 	public static void init() throws Exception {
+		//扫描所有被@Aspect注解的类
 		Set<Class<?>> aspectClassSet = ClassSetHelper.getClassSetByAnnotation(Aspect.class);
 		for(Class<?> aspectClass : aspectClassSet) {
 			Map<String, String> pointcuts = new HashedMap<>();
+			//构造类对象
 			Object aspect = aspectClass.getDeclaredConstructor().newInstance();
-			for(Method method:aspectClass.getMethods()) {
+			for(Method method : aspectClass.getMethods()) {
+				//扫描所有被@Pointcut标记的类
 				if(method.isAnnotationPresent(Pointcut.class)) {
 					String pointcutName = method.getName();
 					String pointcut = method.getAnnotation(Pointcut.class).value();
@@ -76,21 +79,22 @@ public class AOPHelper {
 					}
 				}
 			}
-			for(Method method:aspectClass.getMethods()) {
+			//方法增强
+			for(Method method : aspectClass.getMethods()) {
 				injectMethodAdvices(aspect, method, pointcuts);
 			}
 		}
 		//对增强类根据注解的order进行排序
-		for(Method method:methodAdvicesMap.keySet()) {
-			for(String key:methodAdvicesMap.get(method).keySet()) {
+		for(Method method : methodAdvicesMap.keySet()) {
+			for(String key : methodAdvicesMap.get(method).keySet()) {
 				Collections.sort(methodAdvicesMap.get(method).get(key), new Comparator<Advice>() {
 					@Override
 					public int compare(Advice o1, Advice o2) {
 						// TODO Auto-generated method stub
-						if(o1.getOrder()==o2.getOrder()) {
+						if(o1.getOrder() == o2.getOrder()) {
 							return 0;
 						}
-						else if (o1.getOrder()>o2.getOrder()) {
+						else if (o1.getOrder() > o2.getOrder()) {
 							return 1;
 						}
 						else {
@@ -103,8 +107,9 @@ public class AOPHelper {
 		//重新注册需要增强的类，注入代理类
 		try {
 			CGLibProxy cgLibProxy = new CGLibProxy(methodAdvicesMap);
-			for(Class<?> cls:classMethodMap.keySet()) {
-				BeanDefinition beanDefinition=null;
+			for(Class<?> cls : classMethodMap.keySet()) {
+				BeanDefinition beanDefinition = null;
+				//如果已经注册过，则获得对应的BeanDefinition，否则就创建新的BeanDefinition
 				if(BeanDefinitionRegistry.containsBeanDefinition(cls.getName())) {
 					beanDefinition = BeanDefinitionRegistry.getBeanDefinition(cls.getName());
 				}
@@ -112,8 +117,10 @@ public class AOPHelper {
 					beanDefinition = new GenericBeanDefinition();
 					beanDefinition.setBeanClass(cls);
 				}
+				//可以被代理，代理方式为cgLib
 				beanDefinition.setIsProxy(true);
 				beanDefinition.setProxy(cgLibProxy);
+				//重新注册BeanDefinition
 				BeanDefinitionRegistry.registryBeanDefinition(cls.getName(), beanDefinition);
 				System.out.println("AOPHelper 注册 "+cls.getName());
 			}
@@ -141,31 +148,32 @@ public class AOPHelper {
 	 * @param pointcuts
 	 * @throws Exception
 	 */
-    private static void injectMethodAdvices(Object aspect,Method method,Map<String, String> pointcuts) throws Exception {
-    	String pointValue=null;
+    private static void injectMethodAdvices(Object aspect, Method method, Map<String, String> pointcuts) throws Exception {
+    	String pointValue = null;
     	String pointType = null;
     	Integer order = -1;
-    	if(method.isAnnotationPresent(Before.class)) {
+		//根据注释参数赋值
+    	if (method.isAnnotationPresent(Before.class)) {
     		pointValue = (method.getAnnotation(Before.class)).value();
     		order = (method.getAnnotation(Before.class)).order();
     		pointType = AdviceTypeConstant.BEFORE;
     	}
-    	else if(method.isAnnotationPresent(After.class)) {
+    	else if (method.isAnnotationPresent(After.class)) {
     		pointValue = (method.getAnnotation(After.class)).value();
     		order = (method.getAnnotation(After.class)).order();
     		pointType = AdviceTypeConstant.AFTER;
     	}
-    	else if(method.isAnnotationPresent(Around.class)) {
+    	else if (method.isAnnotationPresent(Around.class)) {
     		pointValue = (method.getAnnotation(Around.class)).value();
     		order = (method.getAnnotation(Around.class)).order();
     		pointType = AdviceTypeConstant.AROUND;
     	}
-    	else if(method.isAnnotationPresent(AfterReturning.class)) {
+    	else if (method.isAnnotationPresent(AfterReturning.class)) {
     		pointValue = (method.getAnnotation(AfterReturning.class)).value();
     		order = (method.getAnnotation(AfterReturning.class)).order();
     		pointType = AdviceTypeConstant.AFTERRETURNING;
     	}
-    	else if(method.isAnnotationPresent(AfterThrowing.class)) {
+    	else if (method.isAnnotationPresent(AfterThrowing.class)) {
     		pointValue = (method.getAnnotation(AfterThrowing.class)).value();
     		order = (method.getAnnotation(AfterThrowing.class)).order();
     		pointType = AdviceTypeConstant.AFTERTHROWING;
@@ -174,18 +182,24 @@ public class AOPHelper {
     		//System.out.println(method.getName()+" 不是增强");
 			return;
 		}
+		//获得注解所对应的方法路径(Str)
     	pointValue = parsePointValue(pointcuts, pointValue);
-    	
+
+		//根据方法路径获取方法名和类名
 		Map<String, String> classAndMethod = getClassAndMethod(pointValue);
 		try {
+			//根据类名加载类
 			Class<?> targetClass = Class.forName(classAndMethod.get("class"));
+			//如果之前没被代理过，则新增代理类和代理方法
 			if(!classMethodMap.containsKey(targetClass)) {
 				classMethodMap.put(targetClass,new ArrayList<Method>());
 			}
-			for(Method method2:targetClass.getMethods()) {
-				if(classAndMethod.get("method").equals("*") || classAndMethod.get("method").equals(method2.getName())) {
+			//遍历该类被代理的方法
+			for(Method method2 : targetClass.getMethods()) {
+//				if(classAndMethod.get("method").equals("*") || classAndMethod.get("method").equals(method2.getName())) {
+				if(classAndMethod.get("method").equals(method2.getName())) {
 					classMethodMap.get(targetClass).add(method2);
-					Advice advice  = new Advice(aspect, method,order);
+					Advice advice  = new Advice(aspect, method, order);
 					if(!methodAdvicesMap.containsKey(method2)) {
 						methodAdvicesMap.put(method2, new HashedMap<String, List<Advice>>());
 					}
@@ -213,11 +227,14 @@ public class AOPHelper {
 			return null;
 		}
 		String result = null;
+		//如果value末尾是()，则表示是自己定义的方法，如point()，否则则是外来方法
 		if(pointValue.endsWith("()")) {
 			String pointcutName = pointValue.replace("()", "");
+			//如果该方法没被@Pointcut标记过，则不会在pointcuts(map)中
 			if(!pointcuts.containsKey(pointcutName)) {
 				throw new Exception(pointValue+" 未定义");
 			}
+			//获取@Pointcut的value
 			result = pointcuts.get(pointcutName);
 		}
 		else {
@@ -232,6 +249,7 @@ public class AOPHelper {
 	 */
     private  static  Map<String, String> getClassAndMethod(String value) {
         Map<String, String> map = new HashMap<String, String>();
+		//.为特殊字符，它表示任意字符，所以要\\转义为普通字符
         String[] split = value.split("\\.");
         if (split.length == 0) {
             throw new RuntimeException("全限量名解析异常");

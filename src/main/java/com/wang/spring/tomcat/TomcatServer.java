@@ -1,5 +1,6 @@
 package com.wang.spring.tomcat;
 
+import com.wang.spring.utils.ConfigUtil;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -28,7 +29,9 @@ public class TomcatServer {
     	}
         //设置绑定的ip及端口号
         tomcat.setHostname("localhost");
-        tomcat.setPort(8080);
+//        tomcat.setPort(8080);
+        int Port = ConfigUtil.getServerPort();
+        tomcat.setPort(Port);
         final Context context = tomcat.addContext("/", null);
         Tomcat.addServlet(context, "dispatch", new DispatcherServlet());
         context.addServletMapping("/", "dispatch");
