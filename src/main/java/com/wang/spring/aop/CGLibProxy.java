@@ -20,7 +20,7 @@ import net.sf.cglib.proxy.MethodProxy;
  * @author Administrator
  *
  */
-public class CGLibProxy implements MethodInterceptor,MyProxy{
+public class CGLibProxy implements MethodInterceptor, MyProxy{
 	//目标代理方法和增强列表的映射
 	Map<Method, Map<String, List<Advice>>> methodAdvicesMap = null;
 	//事务管理器
@@ -47,19 +47,20 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 	 */
 	@Override
 	public Object intercept(Object object, Method method, Object[] arg2, MethodProxy methodProxy) throws Throwable {
-		Object result=null;
+		Object result = null;
 		TransactionStatus status = geTransactionStatus(object, method);
 		status.isTrans = transactionManager.isTransactionPresent();
 		//判断是否增强
 		Map<String, List<Advice>> advices =  methodAdvicesMap.get(method);
 		try {
 			//前置增强
-			invokeAdvice(method,advices,AdviceTypeConstant.BEFORE);
+			invokeAdvice(method, advices, AdviceTypeConstant.BEFORE);
 			//环绕增强
-			System.out.println("当前事务是否存在:"+status.isTrans);
-			if(isAdviceNeed(method) && advices!=null && advices.containsKey(AdviceTypeConstant.AROUND)) {
+			System.out.println("当前事务是否存在:" + status.isTrans);
+			if(isAdviceNeed(method) && advices != null && advices.containsKey(AdviceTypeConstant.AROUND)) {
+				//获取环绕增强类的集合
 				List<Advice> aroundAdvices = advices.get(AdviceTypeConstant.AROUND);
-				if(aroundAdvices!=null && !aroundAdvices.isEmpty()) {
+				if(aroundAdvices != null && !aroundAdvices.isEmpty()) {
 					Advice advice = aroundAdvices.get(0);
 					JoinPoint joinPoint = new JoinPoint(object, methodProxy, arg2);
 					Method adviceMethod = advice.getAdviceMethod();
@@ -68,7 +69,7 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 						//开启事务
 						beginTransaction(status);
 						//执行方法
-						result=adviceMethod.invoke(aspect,joinPoint);
+						result = adviceMethod.invoke(aspect,joinPoint);
 						//提交事务
 						commitTransaction(status);
 					} catch (Throwable e) {
@@ -85,7 +86,6 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 						//释放事务
 						closeTransaction(status);
 					}
-					
 				}
 				else {
 					try {
@@ -96,7 +96,7 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 					} catch (Throwable e) {
 						e.printStackTrace();
 						//回滚事务
-						for(Class<? extends Throwable> th:status.rollbackFor) {
+						for(Class<? extends Throwable> th : status.rollbackFor) {
 							if(th.isAssignableFrom(e.getClass())) {
 								rollbackTransaction(status);
 							}
@@ -105,7 +105,6 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 					finally {
 						closeTransaction(status);
 					}
-					
 				}
 			}
 			else {
@@ -143,11 +142,11 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 		return result;
 	}
 	//执行通知增强
-	private void invokeAdvice(Method method,Map<String, List<Advice>> advices,String type) throws Throwable {
-		if(isAdviceNeed(method) && advices!=null && advices.containsKey(type)) {
-			List<Advice> adviceList=advices.get(type);
-			if(adviceList!=null && !adviceList.isEmpty()) {
-				for(Advice advice:adviceList) {
+	private void invokeAdvice(Method method, Map<String, List<Advice>> advices, String type) throws Throwable {
+		if(isAdviceNeed(method) && advices != null && advices.containsKey(type)) {
+			List<Advice> adviceList = advices.get(type);
+			if(adviceList != null && !adviceList.isEmpty()) {
+				for(Advice advice : adviceList) {
 					Method adviceMethod = advice.getAdviceMethod();
 					Object aspect = advice.getAspect();
 					adviceMethod.invoke(aspect);
@@ -173,7 +172,8 @@ public class CGLibProxy implements MethodInterceptor,MyProxy{
 	private TransactionStatus geTransactionStatus(Object object,Method method) {
 		TransactionStatus status = new TransactionStatus();
 		status.isNeed = false;
-		if(transactionManager!=null && (object.getClass().isAnnotationPresent(Transactional.class) || method.isAnnotationPresent(Transactional.class))) {
+		//如果类或者方法被@Transactional标注过，则设置事务
+		if(transactionManager != null && (object.getClass().isAnnotationPresent(Transactional.class) || method.isAnnotationPresent(Transactional.class))) {
 			status.isNeed = true;
 			if(object.getClass().isAnnotationPresent(Transactional.class)) {
 				Transactional transactional = object.getClass().getAnnotation(Transactional.class);

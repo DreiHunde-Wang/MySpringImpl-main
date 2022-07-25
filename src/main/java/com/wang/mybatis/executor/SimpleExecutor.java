@@ -75,7 +75,7 @@ public class SimpleExecutor implements Executor{
      * 执行update,insert,delete等sql语句
      */
     @Override
-    public int update(Method method,Object[] args)throws SQLException{
+    public int update(Method method, Object[] args)throws SQLException{
         PreparedStatementHandler preparedStatementHandler = null;
         PreparedStatement preparedStatement = null;
         Integer count = 0;

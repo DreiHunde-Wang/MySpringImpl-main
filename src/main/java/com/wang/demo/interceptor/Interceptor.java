@@ -9,7 +9,7 @@ import com.wang.spring.aop.JoinPoint;
 
 @Aspect
 public class Interceptor {
-	@Pointcut("com.wang.demo.service.Impl.UserService.registerUser")
+	@Pointcut("com.wang.demo.service.Impl.UserServiceImpl.registerUser")
 	public void point() {
 		
 	}
@@ -19,22 +19,22 @@ public class Interceptor {
 		System.out.println("开始调用registerUser,当前时间为："+System.currentTimeMillis());
 	}
 	
-	@Before(value = "com.wang.demo.service.Impl.UserService.loginUser")
+	@Before(value = "com.wang.demo.service.UserServiceImpl.UserService.loginUser")
 	public void beforeService2() {
 		System.out.println("开始调用loginUser,当前时间为："+System.currentTimeMillis());
 	}
 	
-	@Before(value = "com.wang.demo.service.Impl.UserService.isUserLogin")
+	@Before(value = "com.wang.demo.service.UserServiceImpl.UserService.isUserLogin")
 	public void beforeService3() {
 		System.out.println("开始调用isUserLogin,当前时间为："+System.currentTimeMillis());
 	}
 	
 	@Around(value = "point()")
 	public Object aroundService(JoinPoint joinPoint) {
-		Object result=null;
+		Object result = null;
 		System.out.println("around调用之前............");
 		try {
-			result=joinPoint.proceed();
+			result = joinPoint.proceed();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -43,6 +43,23 @@ public class Interceptor {
 			e.printStackTrace();
 		}
 		System.out.println("around调用之后..........");
+		return result;
+	}
+
+	@Around(value = "point()")
+	public Object aroundService2(JoinPoint joinPoint) {
+		Object result = null;
+		System.out.println("around2调用之前............");
+		try {
+			result = joinPoint.proceed();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("around2调用之后..........");
 		return result;
 	}
 	

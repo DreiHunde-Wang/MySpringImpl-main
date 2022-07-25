@@ -16,6 +16,6 @@ public class JedisFake{
 	}
 	@Override
 	public String toString() {
-		return host+":"+port;
+		return host + ":" + port;
 	}
 }

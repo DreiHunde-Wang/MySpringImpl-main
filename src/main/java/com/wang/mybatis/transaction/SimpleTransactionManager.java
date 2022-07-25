@@ -56,7 +56,7 @@ public class SimpleTransactionManager implements TransactionManager{
     public boolean isTransactionPresent() {
     	Connection connection = connectionThreadLocal.get();
     	try {
-			if(connection!=null && !connection.isClosed() && !connection.getAutoCommit()) {
+			if(connection != null && !connection.isClosed() && !connection.getAutoCommit()) {
 				return true;
 			}
 		} catch (SQLException e) {

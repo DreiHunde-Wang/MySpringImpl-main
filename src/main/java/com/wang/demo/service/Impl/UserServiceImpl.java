@@ -9,6 +9,10 @@ import com.wang.spring.annotation.aop.Transactional;
 import com.wang.spring.annotation.ioc.Autowired;
 import com.wang.spring.annotation.ioc.Service;
 import redis.clients.jedis.Jedis;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @Service
 public class UserServiceImpl implements UserService {
 	
@@ -24,7 +28,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean registerUser(UserRequest request) {
         try{
-            userMapper.insertUser(request.getUserName(), request.getPassword(), System.currentTimeMillis());
+
+            userMapper.insertUser(request.getUserName(), request.getPassword(), new Date(System.currentTimeMillis()));
             return true;
         }catch (Exception e){
             e.printStackTrace();

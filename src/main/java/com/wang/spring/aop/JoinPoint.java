@@ -8,12 +8,14 @@ import net.sf.cglib.proxy.MethodProxy;
  *
  */
 public class JoinPoint {
-	private Object target=null;
-	private Method method=null;
+	//代理目标
+	private Object target = null;
+	//目标方法
+	private Method method = null;
 	//目标方法的代理
-	private MethodProxy methodProxy=null;
-	private Object[] args=null;
-	public JoinPoint(Object target, Method method,Object[] args) {
+	private MethodProxy methodProxy = null;
+	private Object[] args = null;
+	public JoinPoint(Object target, Method method, Object[] args) {
 		this.target = target;
 	    this.method = method;
 	    this.args = args;
@@ -43,15 +45,15 @@ public class JoinPoint {
 	 */
 	public Object proceed() throws Throwable{
 		Object result;
-		if(methodProxy!=null) {
-			result=methodProxy.invokeSuper(target, this.args);
+		if(methodProxy != null) {
+			result = methodProxy.invokeSuper(target, this.args);
 		}
 		else {
-			if(this.args==null) {
-				result=method.invoke(target);
+			if(this.args == null) {
+				result = method.invoke(target);
 			}
 			else {
-				result=method.invoke(target, this.args);
+				result = method.invoke(target, this.args);
 			}
 		}
 		
@@ -64,7 +66,7 @@ public class JoinPoint {
 	 * @throws Throwable
 	 */
 	public Object proceed(Object[] args) throws Throwable{
-		if(methodProxy!=null) {
+		if(methodProxy != null) {
 			return methodProxy.invokeSuper(target, args);
 		}
 		else {

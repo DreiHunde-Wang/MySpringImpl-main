@@ -1,11 +1,13 @@
 package com.wang.demo.model;
 
+import java.util.Date;
+
 public class User{
     private Integer id;
     private String username;
     private String password;
-    private Long timestamp;
-    
+    private Date timestamp;
+
     public Integer getId() {
         return id;
     }
@@ -30,11 +32,11 @@ public class User{
         this.password = password;
     }
 	
-    public Long getTimeStamp() {
+    public Date getTimeStamp() {
         return timestamp;
     }
 
-    public void setTimeStamp(Long timestamp) {
+    public void setTimeStamp(Date timestamp) {
         this.timestamp = timestamp;
     }
     

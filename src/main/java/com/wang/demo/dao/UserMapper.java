@@ -6,6 +6,8 @@ import com.wang.mybatis.annotation.Mapper;
 import com.wang.mybatis.annotation.Param;
 import com.wang.mybatis.annotation.Select;
 
+import java.util.Date;
+
 @Mapper
 public interface UserMapper {
 
@@ -13,7 +15,7 @@ public interface UserMapper {
 	public User selectUser(@Param("id") Integer id);
 	
 	@Insert("insert into user(username,password,timestamp) values(#{username},#{password},#{timestamp})")
-	public int insertUser(@Param("username") String username,@Param("password") String password,@Param("timestamp") Long timestamp);
+	public int insertUser(@Param("username") String username, @Param("password") String password, @Param("timestamp") Date timestamp);
 	
 	@Select("select * from user where username=#{username}")
 	public User selectUser(@Param("username") String username);

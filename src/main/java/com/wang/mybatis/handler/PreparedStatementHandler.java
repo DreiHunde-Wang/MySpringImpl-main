@@ -4,6 +4,9 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import com.wang.mybatis.core.MapperHelper;
@@ -44,7 +47,7 @@ public class PreparedStatementHandler {
         String parsedSql = parseSql(sql, clazzes, paramNames, params, paramInjectTypes, args);
         PreparedStatement preparedStatement = connection.prepareStatement(parsedSql);
         //再注入#{ }参数
-        preparedStatement = typeInject(preparedStatement,clazzes,paramNames,params,paramInjectTypes,args);
+        preparedStatement = typeInject(preparedStatement, clazzes, paramNames, params, paramInjectTypes, args);
         return preparedStatement;
     }
     /**
@@ -62,7 +65,7 @@ public class PreparedStatementHandler {
     	Integer index = sqlBuilder.indexOf("?");
     	Integer i = 0;
     	while (index>0 && i<paramInjectTypes.size()) {
-			if(paramInjectTypes.get(i)==1) {
+			if(paramInjectTypes.get(i) == 1) {
 				i++;
 				continue;
 			}
@@ -88,7 +91,10 @@ public class PreparedStatementHandler {
 			}
 			else if (Short.class.equals(type)) {
 				injectValue = Short.toString((Short) arg);
-			}
+			} else if (Date.class.equals((type))) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                injectValue = sdf.format((Date) arg);
+            }
 			sqlBuilder.replace(index, index+1, injectValue);
 			index = sqlBuilder.indexOf("?");
 			i++;
@@ -135,6 +141,11 @@ public class PreparedStatementHandler {
             else if(Long.class.equals(type) || long.class.equals(type)){
                 if(injectIndex >= 0){
                     preparedStatement.setLong(injectIndex+1,(Long)args[i]);
+                }
+            } else if (Date.class.equals(type)) {
+                if(injectIndex >= 0){
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    preparedStatement.setString(injectIndex+1, (sdf.format((Date)args[i])) );
                 }
             }
         }
