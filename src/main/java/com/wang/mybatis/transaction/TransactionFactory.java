@@ -19,38 +19,41 @@ public class TransactionFactory {
 	 * @return
 	 */
     public static TransactionManager newTransaction(Integer level, Boolean autoCommmit){
-    	if(transaction==null) {
+    	if (transaction == null) {
 			synchronized (TransactionManager.class) {
-				 if(transaction==null){
+				 if (transaction == null){
 					DataSource dataSource = null;
 					//根据配置决定是否使用数据库连接池
-					if(ConfigUtil.isDataSourcePool()) {
-						dataSource  =new PoolDataSource(ConfigUtil.getJdbcDriver(),  ConfigUtil.getJdbcUrl(),  ConfigUtil.getJdbcUsername(),  ConfigUtil.getJdbcPassword(),
-								ConfigUtil.getDataSourcePoolMaxSize(),ConfigUtil.getDataSourcePoolWaitTimeMill());
-					}
-					else {
-						dataSource = new  NormalDataSource(ConfigUtil.getJdbcDriver(),  ConfigUtil.getJdbcUrl(),  ConfigUtil.getJdbcUsername(),  ConfigUtil.getJdbcPassword());
+					if (ConfigUtil.isDataSourcePool()) {
+						dataSource = new PoolDataSource(ConfigUtil.getJdbcDriver(), ConfigUtil.getJdbcUrl(), ConfigUtil.getJdbcUsername(), ConfigUtil.getJdbcPassword(),
+								ConfigUtil.getDataSourcePoolMaxSize(), ConfigUtil.getDataSourcePoolWaitTimeMill());
+					} else {
+						dataSource = new NormalDataSource(ConfigUtil.getJdbcDriver(), ConfigUtil.getJdbcUrl(), ConfigUtil.getJdbcUsername(), ConfigUtil.getJdbcPassword());
 					}
 					 
-					transaction = new SimpleTransactionManager(dataSource,level,autoCommmit);
+					transaction = new SimpleTransactionManager(dataSource, level, autoCommmit);
 					return transaction;
 				}
 			}
 		}
     	return transaction;
     }
-    
-    public static TransactionManager newTransaction(){
-    	 if(transaction==null) {
+
+	/**
+	 * 生成一个TransactionManager实例(无参构造)，并且是单例的
+	 * @return
+	 */
+	public static TransactionManager newTransaction(){
+		//双重校验建创建单例
+    	 if (transaction == null) {
 			synchronized (TransactionManager.class) {
-				 if(transaction==null){
+				 if (transaction == null){
 					DataSource dataSource = null;
-					if(ConfigUtil.isDataSourcePool()) {
-						dataSource  =new PoolDataSource(ConfigUtil.getJdbcDriver(),  ConfigUtil.getJdbcUrl(),  ConfigUtil.getJdbcUsername(),  ConfigUtil.getJdbcPassword(),
-								ConfigUtil.getDataSourcePoolMaxSize(),ConfigUtil.getDataSourcePoolWaitTimeMill());
-					}
-					else {
-						dataSource = new  NormalDataSource(ConfigUtil.getJdbcDriver(),  ConfigUtil.getJdbcUrl(),  ConfigUtil.getJdbcUsername(),  ConfigUtil.getJdbcPassword());
+					if (ConfigUtil.isDataSourcePool()) {
+						dataSource = new PoolDataSource(ConfigUtil.getJdbcDriver(), ConfigUtil.getJdbcUrl(), ConfigUtil.getJdbcUsername(), ConfigUtil.getJdbcPassword(),
+								ConfigUtil.getDataSourcePoolMaxSize(), ConfigUtil.getDataSourcePoolWaitTimeMill());
+					} else {
+						dataSource = new  NormalDataSource(ConfigUtil.getJdbcDriver(), ConfigUtil.getJdbcUrl(), ConfigUtil.getJdbcUsername(), ConfigUtil.getJdbcPassword());
 					}
 					transaction = new SimpleTransactionManager(dataSource);
 					return transaction;

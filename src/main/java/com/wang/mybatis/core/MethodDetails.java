@@ -6,7 +6,7 @@ public class MethodDetails{
 	//方法返回类型
     private Class<?> returnType;
     //是否返回集合
-    private boolean HasSet;
+    private boolean hasSet;
     //参数类型
     private Class<?>[] parameterTypes;
     //参数名称
@@ -23,11 +23,11 @@ public class MethodDetails{
     }
 
     public boolean isHasSet() {
-        return HasSet;
+        return hasSet;
     }
 
     public void setHasSet(boolean hasSet) {
-        HasSet = hasSet;
+        this.hasSet = hasSet;
     }
 
     public Class<?>[] getParameterTypes() {

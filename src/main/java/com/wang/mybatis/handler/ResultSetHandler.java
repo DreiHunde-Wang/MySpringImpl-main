@@ -39,34 +39,30 @@ public class ResultSetHandler {
         List<T> res = new ArrayList<>();
         while (resultSet.next()){
         	/** 若返回是基础数据类型 */
-            if(String.class.equals(typeReturn)){
+            if (String.class.equals(typeReturn)){
                 String val = resultSet.getString(1);
-                if(val != null){
+                if (val != null){
                     res.add((T)val);
                 }
-            }
-            else if(Integer.class.equals(typeReturn) || int.class.equals(typeReturn)){
+            } else if (Integer.class.equals(typeReturn) || int.class.equals(typeReturn)){
                 Integer val = resultSet.getInt(1);
-                if(val != null){
+                if (val != null){
                     res.add((T)val);
                 }
-            }
-            else if(Float.class.equals(typeReturn) || float.class.equals(typeReturn)){
+            } else if (Float.class.equals(typeReturn) || float.class.equals(typeReturn)){
                 Float val = resultSet.getFloat(1);
-                if(val != null){
+                if (val != null){
                     res.add((T)val);
                 }
-                
-            }
-            else if(Double.class.equals(typeReturn) || double.class.equals(typeReturn)){
+            } else if (Double.class.equals(typeReturn) || double.class.equals(typeReturn)){
             	Double val = resultSet.getDouble(1);
-                if(val != null){
+                if (val != null){
                     res.add((T)val);
                 }
-            }
-            else {
+            } else {
+                //根据返回值类型生成对象
             	Object val = generateObjFromResultSet(resultSet, typeReturn);
-                if(val != null){
+                if (val != null){
                     res.add((T)val);
                 }
             }
@@ -80,18 +76,20 @@ public class ResultSetHandler {
      * @return
      * @throws Exception
      */
-    private Object generateObjFromResultSet(ResultSet resultSet,Class<?> clazz) throws Exception{
+    private Object generateObjFromResultSet(ResultSet resultSet, Class<?> clazz) throws Exception{
         Constructor[] constructors = clazz.getConstructors();
         Constructor usedConstructor = null;
-        for(Constructor constructor:constructors){
-            if(constructor.getParameterCount() == 0){
+        for (Constructor constructor : constructors){
+            //无参构造
+            if (constructor.getParameterCount() == 0){
                 usedConstructor = constructor;
                 break;
             }
         }
-        if(constructors == null) {
+        if (constructors == null) {
             throw new RuntimeException(typeReturn + " is not empty constructor");
         }
+        //无参构造器创建实例
         Object object = usedConstructor.newInstance();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
@@ -101,40 +99,31 @@ public class ResultSetHandler {
             if (type.equals(String.class)) {
                 String column = resultSet.getString(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Integer.class)) {
+            } else if (type.equals(Integer.class)) {
                 Integer column = resultSet.getInt(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Long.class)) {
+            } else if (type.equals(Long.class)) {
                 Long column = resultSet.getLong(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Float.class)) {
+            } else if (type.equals(Float.class)) {
             	Float column = resultSet.getFloat(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Double.class)) {
+            } else if (type.equals(Double.class)) {
             	Double column = resultSet.getDouble(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(BigDecimal.class)) {
+            } else if (type.equals(BigDecimal.class)) {
             	BigDecimal column = resultSet.getBigDecimal(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Blob.class)) {
+            } else if (type.equals(Blob.class)) {
             	Blob column = (Blob) resultSet.getBlob(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Boolean.class)) {
+            } else if (type.equals(Boolean.class)) {
             	Boolean column = resultSet.getBoolean(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(Date.class)) {
+            } else if (type.equals(Date.class)) {
             	Date column = resultSet.getDate(fname);
                 field.set(object, column);
-            }
-            else if (type.equals(byte[].class)) {
+            } else if (type.equals(byte[].class)) {
             	byte[] column = resultSet.getBytes(fname);
                 field.set(object, column);
             }

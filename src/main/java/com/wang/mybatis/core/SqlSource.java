@@ -39,36 +39,35 @@ public class SqlSource {
         	String sqlParamName;
         	Integer injectType;
             //只有拼接，裁剪前缀到后缀作为变量名，example: sqlParamName = "${id}"
-        	if(labelPrefix1Index>0 && labelPrefix2Index<=0) {
-        		sqlParamName = sql.substring(labelPrefix1Index,sql.indexOf(labelSuffix)+1);
+        	if (labelPrefix1Index > 0 && labelPrefix2Index <= 0) {
+        		sqlParamName = sql.substring(labelPrefix1Index, sql.indexOf(labelSuffix) + 1);
         		injectType = 0;
         	}
             //只有注入
-        	else if (labelPrefix2Index>0 && labelPrefix1Index<=0) {
-        		sqlParamName = sql.substring(labelPrefix2Index,sql.indexOf(labelSuffix)+1);
+        	else if (labelPrefix2Index > 0 && labelPrefix1Index <= 0) {
+        		sqlParamName = sql.substring(labelPrefix2Index, sql.indexOf(labelSuffix) + 1);
         		injectType = 1;
 			}
             //拼接在前
-        	else if(labelPrefix1Index>0 && labelPrefix2Index>0 && labelPrefix1Index<labelPrefix2Index){
-        		sqlParamName = sql.substring(labelPrefix1Index,sql.indexOf(labelSuffix)+1);
+        	else if (labelPrefix1Index > 0 && labelPrefix2Index > 0 && labelPrefix1Index < labelPrefix2Index){
+        		sqlParamName = sql.substring(labelPrefix1Index, sql.indexOf(labelSuffix) + 1);
         		injectType = 0;
 			}
             //注入在前
-        	else if(labelPrefix1Index>0 && labelPrefix2Index>0 && labelPrefix1Index>labelPrefix2Index){
-        		sqlParamName = sql.substring(labelPrefix2Index,sql.indexOf(labelSuffix)+1);
+        	else if (labelPrefix1Index > 0 && labelPrefix2Index > 0 && labelPrefix1Index > labelPrefix2Index){
+        		sqlParamName = sql.substring(labelPrefix2Index, sql.indexOf(labelSuffix) + 1);
         		injectType = 1;
 			}
         	else {
 				continue;
 			}
             //先替换需要传参的变量名为?
-            sql = sql.replace(sqlParamName,"?");
-            if(injectType==0) {
-            	params.add(sqlParamName.replace("${","").replace("}",""));
+            sql = sql.replace(sqlParamName, "?");
+            if (injectType == 0) {
+            	params.add(sqlParamName.replace("${", "").replace("}", ""));
             	paramInjectTypes.add(0);
-            }
-            else {
-            	params.add(sqlParamName.replace("#{","").replace("}",""));
+            } else {
+            	params.add(sqlParamName.replace("#{", "").replace("}", ""));
             	paramInjectTypes.add(1);
 			}
             

@@ -27,7 +27,7 @@ public class MapperHelper {
 	//单例对象
 	private volatile static MapperHelper mapperHelper = null;
 	//方法详情映射
-    private static Map<Method,MethodDetails> cacheMethodDetails = new ConcurrentHashMap<>();
+    private static Map<Method, MethodDetails> cacheMethodDetails = new ConcurrentHashMap<>();
     //被@Mapper注解的类集合
     private static Set<Class<?>> mapperClassSet = null;
     static {
@@ -40,7 +40,7 @@ public class MapperHelper {
      * @return
      */
     public static MapperHelper getInstance() {
-        if(mapperHelper==null) {
+        if (mapperHelper==null) {
             synchronized (MapperHelper.class) {
                 if (mapperHelper == null)
                 mapperHelper = new MapperHelper();
@@ -52,7 +52,7 @@ public class MapperHelper {
      * 获得cacheMethodDetails
      * @return
      */
-    public static Map<Method,MethodDetails> getCacheMethodDetails(){
+    public static Map<Method, MethodDetails> getCacheMethodDetails(){
     	return cacheMethodDetails;
     }
     /**
@@ -60,39 +60,40 @@ public class MapperHelper {
      */
     private static void init(){
     	mapperClassSet = ClassSetHelper.getClassSetByAnnotation(Mapper.class);
-        if(mapperClassSet==null || mapperClassSet.isEmpty()) {
+        if(mapperClassSet == null || mapperClassSet.isEmpty()) {
         	System.out.println("未找到Mapper类");
         	return;
         }
-        for(Class<?> nowClazz: mapperClassSet){
-		    if(!nowClazz.isInterface()){
+        for (Class<?> nowClazz : mapperClassSet){
+		    if (!nowClazz.isInterface()){
 		        continue;
 		    }
 		    Method[] methods = nowClazz.getDeclaredMethods();
-		    for( Method method : methods){
+		    for (Method method : methods){
 		    	//对方法解析，获得详情类
 		        MethodDetails methodDetails = handleParameter(method);
 		        //解析方法注解上的Sql语句
 		        methodDetails.setSqlSource(handleAnnotation(method));
-		        cacheMethodDetails.put(method,methodDetails);
+		        cacheMethodDetails.put(method, methodDetails);
 		    }
 		}
-        //将被@Mapper注解的类注册到BeanDefinition容器中，被设置代理类
-        if(mapperClassSet!=null && !mapperClassSet.isEmpty()) {
+        //将被@Mapper注解的类注册到BeanDefinition容器中，并设置代理类
+        if (mapperClassSet != null && !mapperClassSet.isEmpty()) {
     		CGLibMapperProxy cgLibMapperProxy = new CGLibMapperProxy(ExecutorFactory.getExecutor());
-    		for(Class<?> cls : mapperClassSet) {
+    		for (Class<?> cls : mapperClassSet) {
     			BeanDefinition beanDefinition = null;
-				if(BeanDefinitionRegistry.containsBeanDefinition(cls.getName())) {
+                //如果已经注册过则获取之前的BeanDefinition，否则创建一个新的
+				if (BeanDefinitionRegistry.containsBeanDefinition(cls.getName())) {
 					beanDefinition = BeanDefinitionRegistry.getBeanDefinition(cls.getName());
-				}
-				else {
+				} else {
 					beanDefinition = new GenericBeanDefinition();
 					beanDefinition.setBeanClass(cls);
 				}
+                //为BeanDefinition创建代理
 				beanDefinition.setIsProxy(true);
 				beanDefinition.setProxy(cgLibMapperProxy);
 				BeanDefinitionRegistry.registryBeanDefinition(cls.getName(), beanDefinition);
-				System.out.println("MapperHelper 注册 "+cls.getName());
+				System.out.println("MapperHelper 注册 " + cls.getName());
 			}
     	}
     }
@@ -102,7 +103,7 @@ public class MapperHelper {
      * @return
      */
     public static MethodDetails getMethodDetails(Method method) {
-		if(cacheMethodDetails == null || cacheMethodDetails.isEmpty() || !cacheMethodDetails.containsKey(method)) {
+		if (cacheMethodDetails == null || cacheMethodDetails.isEmpty() || !cacheMethodDetails.containsKey(method)) {
 			return null;
 		}
 		return cacheMethodDetails.get(method);
@@ -120,11 +121,11 @@ public class MapperHelper {
         List<String> parameterNames = new ArrayList<>();
         Parameter[] params = method.getParameters();
         //设置参数名称
-        for(Parameter parameter:params){
+        for (Parameter parameter : params){
             parameterNames.add(parameter.getName());
         }
         //设置注解中的参数名称
-        for(int i = 0; i < parameterCount; i++){
+        for (int i = 0; i < parameterCount; i++){
             parameterNames.set(i,getParamNameFromAnnotation(method,i,parameterNames.get(i)));
         }
         //将参数类型和参数名添加到MethodDetails对象中
@@ -133,15 +134,15 @@ public class MapperHelper {
         //获取方法返回类型
         Type methodReturnType = method.getGenericReturnType();
         Class<?> methodReturnClass = method.getReturnType();
-        if(methodReturnType instanceof ParameterizedType){
+        if (methodReturnType instanceof ParameterizedType){
         	//如果是可参数化的类型，如List，则获取具体参数类型
-            if(!List.class.equals(methodReturnClass)){
+            if (!List.class.equals(methodReturnClass)){
                 throw new RuntimeException("now ibatis only support list");
             }
             Type type = ((ParameterizedType) methodReturnType).getActualTypeArguments()[0];
             methodDetails.setReturnType((Class<?>) type);
             methodDetails.setHasSet(true);
-        }else {
+        } else {
             methodDetails.setReturnType(methodReturnClass);
             methodDetails.setHasSet(false);
         }
@@ -153,30 +154,30 @@ public class MapperHelper {
      * @param method
      * @return
      */
-    private  static SqlSource handleAnnotation(Method method){
+    private static SqlSource handleAnnotation(Method method){
         SqlSource sqlSource = null;
         String sql = null;
         Annotation[] annotations = method.getDeclaredAnnotations();
-        for(Annotation annotation : annotations){
-            if(Select.class.isInstance(annotation)){
+        for (Annotation annotation : annotations){
+            if (Select.class.isInstance(annotation)){
                 Select selectAnnotation = (Select)annotation;
                 sql = selectAnnotation.value();
                 sqlSource = new SqlSource(sql);
                 sqlSource.setExecuteType(SqlTypeConstant.SELECT_TYPE);
                 break;
-            }else if(Update.class.isInstance(annotation)){
+            } else if (Update.class.isInstance(annotation)){
                 Update updateAnnotation = (Update)annotation;
                 sql = updateAnnotation.value();
                 sqlSource = new SqlSource(sql);
                 sqlSource.setExecuteType(SqlTypeConstant.UPDATE_TYPE);
                 break;
-            }else if(Delete.class.isInstance(annotation)){
+            } else if (Delete.class.isInstance(annotation)){
                 Delete deleteAnnotation = (Delete) annotation;
                 sql = deleteAnnotation.value();
                 sqlSource = new SqlSource(sql);
                 sqlSource.setExecuteType(SqlTypeConstant.DELETE_TYPE);
                 break;
-            }else if(Insert.class.isInstance(annotation)){
+            } else if (Insert.class.isInstance(annotation)){
                 Insert insertAnnotation = (Insert) annotation;
                 sql = insertAnnotation.value();
                 sqlSource = new SqlSource(sql);
@@ -184,7 +185,7 @@ public class MapperHelper {
                 break;
             }
         }
-        if(sqlSource == null){
+        if (sqlSource == null){
             throw new RuntimeException("method annotation not null");
         }
         return sqlSource;

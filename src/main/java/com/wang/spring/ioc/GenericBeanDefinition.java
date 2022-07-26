@@ -8,7 +8,7 @@ public class GenericBeanDefinition implements BeanDefinition{
 
     private Class<?> beanClass;
 
-    private BeanScope scope =BeanScope.SINGLETON;
+    private BeanScope scope = BeanScope.SINGLETON;
 
     private String initMethodName;
     
@@ -74,6 +74,6 @@ public class GenericBeanDefinition implements BeanDefinition{
 	@Override
 	public void setIsProxy(boolean isProxy) {
 		// TODO Auto-generated method stub
-		this.isProxy=isProxy;
+		this.isProxy = isProxy;
 	}
 }

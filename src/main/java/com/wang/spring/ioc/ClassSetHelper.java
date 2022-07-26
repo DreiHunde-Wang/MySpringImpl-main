@@ -142,7 +142,7 @@ public class ClassSetHelper {
      * @param classz
      * @param annoClass
      */
-    private static boolean isAnnoPresent(Class<?> classz,Class<?> annoClass) {
+    private static boolean isAnnoPresent(Class<?> classz, Class<?> annoClass) {
 		Annotation[] annotations = (Annotation[]) classz.getAnnotations();
         for (Annotation annotation : annotations) {
             if ( annotation.annotationType() != Deprecated.class &&
@@ -150,7 +150,7 @@ public class ClassSetHelper {
                     annotation.annotationType() != Override.class &&
                     annotation.annotationType() != PostConstruct.class &&
                     annotation.annotationType() != PreDestroy.class &&
-                    annotation.annotationType()!= Resource.class &&
+                    annotation.annotationType() != Resource.class &&
                     annotation.annotationType() != Resources.class &&
                     annotation.annotationType() != Generated.class &&
                     annotation.annotationType() != Target.class &&
@@ -159,8 +159,8 @@ public class ClassSetHelper {
                     annotation.annotationType() != Inherited.class) {
                 if (annotation.annotationType() == annoClass){
                     return true;
-                }else{
-                	return isAnnoPresent(annotation.annotationType(),annoClass);
+                } else {
+                	return isAnnoPresent(annotation.annotationType(), annoClass);
                 }
             }
         }

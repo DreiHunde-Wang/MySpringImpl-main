@@ -10,7 +10,6 @@ import com.wang.spring.annotation.ioc.Autowired;
 import com.wang.spring.annotation.ioc.Service;
 import redis.clients.jedis.Jedis;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
@@ -27,11 +26,10 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public boolean registerUser(UserRequest request) {
-        try{
-
+        try {
             userMapper.insertUser(request.getUserName(), request.getPassword(), new Date(System.currentTimeMillis()));
             return true;
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
         }
 		return false;
@@ -40,10 +38,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User loginUser(UserRequest request) {
 		User user = userMapper.selectUser(request.getUserName());
-		if(null==user || !user.getPassword().equals(request.getPassword())) {
+		if (null == user || !user.getPassword().equals(request.getPassword())) {
 			return null;
 		}
-		String key = "login:"+user.getUserName();
+		String key = "login:" + user.getUserName();
 		jedis.set(key, JSON.toJSONString(user));
 		System.out.println(user.getUserName()+" 登录成功");
 		return user;
@@ -51,15 +49,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean isUserLogin(String username) {
-		String key = "login:"+username;
+		String key = "login:" + username;
 		return jedis.exists(key);
 	}
 
 	@Override
 	public boolean logout(String username) {
 		// TODO Auto-generated method stub
-		String key = "login:"+username;
-		if(!jedis.exists(key)) {
+		String key = "login:" + username;
+		if (!jedis.exists(key)) {
 			return false;
 		}
 		jedis.del(key);
@@ -86,8 +84,6 @@ public class UserServiceImpl implements UserService {
 	public User findUser(Integer id) throws Exception {
 		// TODO Auto-generated method stub
 		User user1 = findUser1(id);
-		
-		User user2 = findUser2(id);
 		return user1;
 		
 	}

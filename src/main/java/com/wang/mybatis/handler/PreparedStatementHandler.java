@@ -14,7 +14,9 @@ import com.wang.mybatis.core.MethodDetails;
 import com.wang.mybatis.core.SqlSource;
 import com.wang.mybatis.transaction.TransactionManager;
 
-
+/**
+ * PreparedStatement管理器
+ */
 public class PreparedStatementHandler {
     private Method method;
     
@@ -24,7 +26,7 @@ public class PreparedStatementHandler {
     
     private Object[] args;
 
-    public PreparedStatementHandler( TransactionManager transactionManager,Method method, Object[] args)throws SQLException {
+    public PreparedStatementHandler(TransactionManager transactionManager, Method method, Object[] args) throws SQLException {
         this.method = method;
         this.transactionManager = transactionManager;
         this.args = args;
@@ -36,6 +38,7 @@ public class PreparedStatementHandler {
      * @throws SQLException
      */
     public PreparedStatement generateStatement() throws SQLException{
+        //获取methodDetails对象，方便获取各类参数
     	MethodDetails methodDetails = MapperHelper.getMethodDetails(method);
         SqlSource sqlSource = methodDetails.getSqlSource();
         Class<?>[] clazzes = methodDetails.getParameterTypes();
@@ -60,42 +63,40 @@ public class PreparedStatementHandler {
      * @param args
      * @return
      */
-    private String parseSql(String sql,Class<?>[] clazzes,List<String> paramNames,List<String> params,List<Integer> paramInjectTypes,Object[] args) {
+    private String parseSql(String sql, Class<?>[] clazzes, List<String> paramNames, List<String> params, List<Integer> paramInjectTypes, Object[] args) {
     	StringBuilder sqlBuilder = new StringBuilder(sql);
     	Integer index = sqlBuilder.indexOf("?");
     	Integer i = 0;
-    	while (index>0 && i<paramInjectTypes.size()) {
-			if(paramInjectTypes.get(i) == 1) {
+    	while (index > 0 && i < paramInjectTypes.size()) {
+			if (paramInjectTypes.get(i) == 1) {
 				i++;
 				continue;
 			}
+            //构建方法参数和Sql语句参数的位置映射
 			String param = params.get(i);
 			Integer paramIndex = paramNames.indexOf(param);
 			Object arg = args[paramIndex];
 			Class<?> type = clazzes[paramIndex];
 			String injectValue = "";
-			if(String.class.equals(type)) {
-				injectValue = "'"+(String) arg + "'";
-			}
-			else if (Integer.class.equals(type)) {
+			if (String.class.equals(type)) {
+//				injectValue = "'" + (String) arg + "'";
+                injectValue = (String) arg;
+			} else if (Integer.class.equals(type)) {
 				injectValue = Integer.toString((Integer) arg);
-			}
-			else if (Float.class.equals(type)) {
+			} else if (Float.class.equals(type)) {
 				injectValue = Float.toString((Float) arg);
-			}
-			else if (Double.class.equals(type)) {
+			} else if (Double.class.equals(type)) {
 				injectValue = Double.toString((Double) arg);
-			}
-			else if (Long.class.equals(type)) {
+			} else if (Long.class.equals(type)) {
 				injectValue = Long.toString((Long) arg);
-			}
-			else if (Short.class.equals(type)) {
+			} else if (Short.class.equals(type)) {
 				injectValue = Short.toString((Short) arg);
 			} else if (Date.class.equals((type))) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 injectValue = sdf.format((Date) arg);
             }
-			sqlBuilder.replace(index, index+1, injectValue);
+            //把?替换为拼接的参数
+			sqlBuilder.replace(index, index + 1, injectValue);
 			index = sqlBuilder.indexOf("?");
 			i++;
 		}
@@ -111,41 +112,39 @@ public class PreparedStatementHandler {
      * @Param params 待注入的参数名，如user.name或普通类型如name
      * @Param args 真实参数值
      **/
-    private PreparedStatement typeInject(PreparedStatement preparedStatement,Class<?>[] clazzes,List<String> paramNames,List<String> params,List<Integer> paramInjectTypes,Object[] args)throws SQLException{
-    	for(int i = 0; i < paramNames.size(); i++){
+    private PreparedStatement typeInject(PreparedStatement preparedStatement, Class<?>[] clazzes, List<String> paramNames, List<String> params, List<Integer> paramInjectTypes, Object[] args) throws SQLException{
+    	for (int i = 0; i < paramNames.size(); i++){
             String paramName = paramNames.get(i);
             Class<?> type = clazzes[i];
             int injectIndex = params.indexOf(paramName);
-            if(paramInjectTypes.get(injectIndex)==0) {
+            if (paramInjectTypes.get(injectIndex) == 0) {
             	continue;
             }
-            if(String.class.equals(type)){
+            if (String.class.equals(type)){
             	//此处是判断sql中是否有待注入的名称({name})和方法内输入对象名(name)相同，若相同，则直接注入
-                if(injectIndex >= 0){
-                    preparedStatement.setString(injectIndex+1,(String)args[i]);
+                if (injectIndex >= 0){
+                    preparedStatement.setString(injectIndex + 1, (String)args[i]);
                 }
-            }else if(Integer.class.equals(type) || int.class.equals(type)){
-                if(injectIndex >= 0){
-                    preparedStatement.setInt(injectIndex+1,(Integer)args[i]);
+            } else if(Integer.class.equals(type) || int.class.equals(type)){
+                if (injectIndex >= 0){
+                    preparedStatement.setInt(injectIndex + 1, (Integer)args[i]);
                 }
-            }else if(Float.class.equals(type) || float.class.equals(type)){
-                if(injectIndex >= 0){
-                    preparedStatement.setFloat(injectIndex+1,(Float)args[i]);
+            } else if(Float.class.equals(type) || float.class.equals(type)){
+                if (injectIndex >= 0){
+                    preparedStatement.setFloat(injectIndex + 1, (Float)args[i]);
                 }
-            }
-            else if(Double.class.equals(type) || double.class.equals(type)){
-                if(injectIndex >= 0){
-                    preparedStatement.setDouble(injectIndex+1,(Double)args[i]);
+            } else if(Double.class.equals(type) || double.class.equals(type)){
+                if (injectIndex >= 0){
+                    preparedStatement.setDouble(injectIndex + 1, (Double)args[i]);
                 }
-            }
-            else if(Long.class.equals(type) || long.class.equals(type)){
-                if(injectIndex >= 0){
-                    preparedStatement.setLong(injectIndex+1,(Long)args[i]);
+            } else if(Long.class.equals(type) || long.class.equals(type)){
+                if (injectIndex >= 0){
+                    preparedStatement.setLong(injectIndex + 1, (Long)args[i]);
                 }
             } else if (Date.class.equals(type)) {
-                if(injectIndex >= 0){
+                if (injectIndex >= 0){
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    preparedStatement.setString(injectIndex+1, (sdf.format((Date)args[i])) );
+                    preparedStatement.setString(injectIndex + 1, (sdf.format((Date)args[i])) );
                 }
             }
         }

@@ -7,6 +7,9 @@ import java.util.Stack;
 import com.wang.mybatis.datasource.DataSource;
 import com.wang.spring.constants.PropagationLevelConstant;
 
+/**
+ * 事务管理器实现
+ */
 public class SimpleTransactionManager implements TransactionManager{
 	
 	//ThreadLocal对象保证每个线程对应唯一的数据库连接
@@ -26,10 +29,10 @@ public class SimpleTransactionManager implements TransactionManager{
 
     public SimpleTransactionManager(DataSource dataSource, Integer level, Boolean autoCommmit) {
         this.dataSource = dataSource;
-        if(level != null){
+        if (level != null){
             this.level = level;
         }
-        if(autoCommmit != null){
+        if (autoCommmit != null){
             this.autoCommit = autoCommmit;
         }
     }
@@ -39,10 +42,9 @@ public class SimpleTransactionManager implements TransactionManager{
     @Override
     public Connection getConnection() throws SQLException{
     	Connection connection = connectionThreadLocal.get();
-    	if(connection!=null && !connection.isClosed()){
+    	if (connection != null && !connection.isClosed()){
     		return connection;
-    	}
-    	else {
+    	} else {
     		Connection tempConnection = dataSource.getConnection();
     		tempConnection.setAutoCommit(autoCommit);
     		tempConnection.setTransactionIsolation(level);
@@ -72,28 +74,28 @@ public class SimpleTransactionManager implements TransactionManager{
     @Override
 	public void beginTransaction(TransactionStatus status) throws SQLException {
 		//PROPAGATION_REQUIRED：如果当前存在事务，则加入该事务，如果当前不存在事务，则创建一个新的事务。
-		if(status.propagationLevel==PropagationLevelConstant.PROPAGATION_REQUIRED) {
-			if(!status.isTrans) {
+		if (status.propagationLevel == PropagationLevelConstant.PROPAGATION_REQUIRED) {
+			if (!status.isTrans) {
 				doCreateTransaction(status.isolationLevel);
 			}
 		}
 		//PROPAGATION_SUPPORTS：如果当前存在事务，则加入该事务；如果当前不存在事务，则以非事务的方式继续运行。
-		else if(status.propagationLevel==PropagationLevelConstant.PROPAGATION_SUPPORTS) {
-			if(!status.isTrans) {
+		else if (status.propagationLevel == PropagationLevelConstant.PROPAGATION_SUPPORTS) {
+			if (!status.isTrans) {
 				//不需要创建事务，直接获取自动提交的连接，以非事务方式运行
 			}
 		}
 		//PROPAGATION_MANDATORY：如果当前存在事务，则加入该事务；如果当前不存在事务，则抛出异常。
 		else if (status.propagationLevel == PropagationLevelConstant.PROPAGATION_MANDATORY) {
-			if(!status.isTrans) {
+			if (!status.isTrans) {
 				throw new RuntimeException("事务传播方式为PROPAGATION_MANDATORY，但当前不存在事务");
 			}
 		}
 		//PROPAGATION_REQUIRES_NEW：重新创建一个新的事务，如果当前存在事务，延缓当前的事务。
 		else if (status.propagationLevel == PropagationLevelConstant.PROPAGATION_REQUIRES_NEW) {
-			if(status.isTrans) {
+			if (status.isTrans) {
 				//将当前事务保存在线程本地的栈中，暂缓执行
-				if(delayThreadLocal.get()==null) {
+				if (delayThreadLocal.get() == null) {
 					Stack<Connection> stack = new Stack<>();
 					delayThreadLocal.set(stack);
 				}
@@ -107,9 +109,9 @@ public class SimpleTransactionManager implements TransactionManager{
 		}
 		//PROPAGATION_NOT_SUPPORTED：以非事务的方式运行，如果当前存在事务，暂停当前的事务。
 		else if (status.propagationLevel == PropagationLevelConstant.PROPAGATION_NOT_SUPPORTED) {
-			if(status.isTrans) {
+			if (status.isTrans) {
 				//将当前事务保存在线程本地的栈中，暂缓执行
-				if(delayThreadLocal.get()==null) {
+				if (delayThreadLocal.get() == null) {
 					Stack<Connection> stack = new Stack<>();
 					delayThreadLocal.set(stack);
 				}
@@ -140,44 +142,42 @@ public class SimpleTransactionManager implements TransactionManager{
      * @throws SQLException
      */
 	private void doCreateTransaction(Integer level) throws SQLException {
+		//创建一个新连接
 		Connection tempConnection = dataSource.getConnection();
 		tempConnection.setAutoCommit(false);
-		if(level!=null) {
+		if (level != null) {
 			tempConnection.setTransactionIsolation(level);
-		}
-		else {
+		} else {
 			tempConnection.setTransactionIsolation(this.level);
 		}
 		connectionThreadLocal.set(tempConnection);
 	}
-	
-	
     /**
      * 提交事务
      */
     @Override
     public void commit(TransactionStatus status) throws SQLException{
     	//如果当前不存在上级事务，则提交事务
-    	if(!status.isTrans) {
+    	if (!status.isTrans) {
     		Connection connection = connectionThreadLocal.get();
-            if(connection != null && !connection.isClosed() && !connection.getAutoCommit()){
+            if (connection != null && !connection.isClosed() && !connection.getAutoCommit()){
                 connection.commit();
             }
     	}
     	//如果当前存在上级事务，且传播行为为PROPAGATION_REQUIRES_NEW或PROPAGATION_NESTED，也进行自动提交
     	else if (status.isTrans && status.propagationLevel == PropagationLevelConstant.PROPAGATION_REQUIRES_NEW) {
     		Connection connection = connectionThreadLocal.get();
-            if(connection != null && !connection.isClosed() && !connection.getAutoCommit()){
+            if (connection != null && !connection.isClosed() && !connection.getAutoCommit()){
                 connection.commit();
             }
 		}
+		//如果当前存在上级事务，且传播行为为嵌套传播，也进行自动提交
     	else if (status.isTrans && status.propagationLevel == PropagationLevelConstant.PROPAGATION_NESTED) {
     		Connection connection = connectionThreadLocal.get();
-            if(connection != null && !connection.isClosed() && !connection.getAutoCommit()){
+            if (connection != null && !connection.isClosed() && !connection.getAutoCommit()){
                 connection.commit();
             }
 		}
-    	
     }
     /**
      * 回滚事务
@@ -186,7 +186,7 @@ public class SimpleTransactionManager implements TransactionManager{
     public void rollback() throws SQLException{
     	//如果为非自动提交，则回滚事务
     	Connection connection = connectionThreadLocal.get();
-        if(connection != null && !connection.isClosed() && !connection.getAutoCommit()){
+        if (connection != null && !connection.isClosed() && !connection.getAutoCommit()){
             connection.rollback();
         }
     }
@@ -197,7 +197,7 @@ public class SimpleTransactionManager implements TransactionManager{
     public void close() throws SQLException{
     	Connection connection = connectionThreadLocal.get();
         //放回连接池
-        if(connection != null  && !connection.isClosed() && connection.getAutoCommit()){
+        if (connection != null && !connection.isClosed() && connection.getAutoCommit()){
         	dataSource.removeConnection(connection);
         	//连接设为null
             connectionThreadLocal.remove();
@@ -211,7 +211,7 @@ public class SimpleTransactionManager implements TransactionManager{
     public void closeTransaction(TransactionStatus status) throws SQLException{
     	Connection connection = connectionThreadLocal.get();
         //如果当前不存在上级事务，且连接未非自动提交，则关闭事务
-        if(!status.isTrans && connection != null && !connection.isClosed() && !connection.getAutoCommit()){
+        if (!status.isTrans && connection != null && !connection.isClosed() && !connection.getAutoCommit()){
         	connection.rollback();
         	connection.setAutoCommit(autoCommit);
         	connection.setTransactionIsolation(level);
@@ -260,7 +260,7 @@ public class SimpleTransactionManager implements TransactionManager{
 		Connection connection = connectionThreadLocal.get();
 		String transactionId = null;
 		try {
-			if(connection != null && !connection.isClosed() && !connection.getAutoCommit()) {
+			if (connection != null && !connection.isClosed() && !connection.getAutoCommit()) {
 				transactionId = connection.toString();
 			}
 		} catch (SQLException e) {
