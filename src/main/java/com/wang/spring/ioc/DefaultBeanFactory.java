@@ -83,7 +83,7 @@ public class DefaultBeanFactory implements BeanFactory{
 		// TODO Auto-generated method stub
 		Object bean = null;
 		try {
-			bean=doGetBean(beanName,BeanScope.SINGLETON);
+			bean = doGetBean(beanName, BeanScope.SINGLETON);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -201,30 +201,29 @@ public class DefaultBeanFactory implements BeanFactory{
 	 * @return
 	 * @throws Exception
 	 */
-	private Object doGetBean(String beanName,BeanScope beanScope) throws Exception{
+	private Object doGetBean(String beanName, BeanScope beanScope) throws Exception{
 		Objects.requireNonNull(beanName, "beanName 不能为空");
 		//获取单例
 		Object bean = getSingleton(beanName);
-		if(bean != null) {
+		if (bean != null) {
 			return bean;
 		}
 		//如果未获取到bean，且bean不在创建中，则置bean的状态为在创建中
-		if(!singletonsCurrentlyInCreation.contains(beanName)) {
+		if (!singletonsCurrentlyInCreation.contains(beanName)) {
 			singletonsCurrentlyInCreation.add(beanName);
 		}
 		BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-		if(beanDefinition == null) {
+		if (beanDefinition == null) {
 			throw new Exception("不存在 "+beanName+" 的定义");
 		}
 		Class<?> beanClass = beanDefinition.getBeanClass();
 		//找到实现类
 		beanClass = findImplementClass(beanClass,null);
 		//判断是否需要代理，若需要则生成代理类
-		if(beanDefinition.getIsProxy() && beanDefinition.getProxy() != null) {
+		if (beanDefinition.getIsProxy() && beanDefinition.getProxy() != null) {
 			MyProxy myProxy = beanDefinition.getProxy();
 			bean = myProxy.getProxy(beanClass);
-		}
-		else {
+		} else {
 			bean = beanClass.getDeclaredConstructor().newInstance();
 		}
 		//将实例化后，但未注入属性的bean，放入三级缓存中
@@ -238,7 +237,7 @@ public class DefaultBeanFactory implements BeanFactory{
 		});
 		//反射调用init方法
 		String initMethodName = beanDefinition.getInitMethodName();
-		if(initMethodName != null) {
+		if (initMethodName != null) {
 			Method method = beanClass.getMethod(initMethodName, null);
 			method.invoke(bean, null);
 		}
@@ -246,13 +245,13 @@ public class DefaultBeanFactory implements BeanFactory{
 		//注入bean的属性
 		fieldInject(beanClass, bean, false);
 		//如果三级缓存存在bean，则拿出放入二级缓存中
-		if(singletonFactories.containsKey(beanName)) {
+		if (singletonFactories.containsKey(beanName)) {
 			ObjectFactory factory  = singletonFactories.get(beanName);
 			earlySingletonObjects.put(beanName, factory.getObject());
 			singletonFactories.remove(beanName);
 		}
 		//如果二级缓存存在bean，则拿出放入一级缓存中
-		if(earlySingletonObjects.containsKey(beanName)) {
+		if (earlySingletonObjects.containsKey(beanName)) {
 			bean = earlySingletonObjects.get(beanName);
 			singletonObjects.put(beanName, bean);
 			earlySingletonObjects.remove(beanName);
@@ -267,15 +266,15 @@ public class DefaultBeanFactory implements BeanFactory{
 	private Object getSingleton(String beanName) {
 		//如果一级存在bean，则直接返回
 		Object bean = singletonObjects.get(beanName);
-		if(bean!=null) {
+		if (bean != null) {
 			return bean;
 		}
 		//如果一级缓存不存在bean，且bean在创建中，则从二级缓存中拿出半成品bean返回，否则从三级缓存拿出放入二级缓存中
-		if(singletonsCurrentlyInCreation.contains(beanName)) {
+		if (singletonsCurrentlyInCreation.contains(beanName)) {
 			bean = earlySingletonObjects.get(beanName);
-			if(bean == null) {
+			if (bean == null) {
 				ObjectFactory factory = singletonFactories.get(beanName);
-				if(factory != null) {
+				if (factory != null) {
 					bean = factory.getObject();
 					earlySingletonObjects.put(beanName, bean);
 					singletonFactories.remove(beanName);
